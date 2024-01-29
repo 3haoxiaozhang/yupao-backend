@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yupi.yupao.common.BaseResponse;
 import com.yupi.yupao.common.ErrorCode;
 import com.yupi.yupao.common.ResultUtils;
+import com.yupi.yupao.config.RedisTemplateConfig;
 import com.yupi.yupao.contant.UserConstant;
 import com.yupi.yupao.exception.BusinessException;
 import com.yupi.yupao.model.domain.Users;
@@ -16,6 +17,8 @@ import com.yupi.yupao.service.UsersService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.catalina.User;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.util.CollectionUtils;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @RestController
@@ -34,6 +38,9 @@ public class UsersController {
 
      @Resource
      private UsersService usersService;
+
+     @Resource
+     private RedisTemplate redisTemplate;
 
     /**
      * 用户注册
@@ -183,8 +190,25 @@ public class UsersController {
     @GetMapping("/recommend")
     public BaseResponse<Page<Users>>  recommendUsers(Long pageSize,Long pageNum,HttpServletRequest request){
 
+
+        Users loginUser=usersService.getLoginUser(request);
+        String redisKey=String.format("yupao.user.recommend:%s",loginUser.getId());
+        ValueOperations operations = redisTemplate.opsForValue();
+
+        //如果有缓存，直接读缓存
+        Page<Users> usersPage = (Page<Users>) operations.get(redisKey);
+        if(usersPage!=null){
+            return ResultUtils.success(usersPage);
+        }
+        //如果没有缓存，将读出数据写入缓存
         QueryWrapper<Users> queryWrapper=new QueryWrapper();
         Page<Users> userList = usersService.page(new Page<>(pageNum,pageSize), queryWrapper);
+        //写缓存
+        try {
+            operations.set(redisKey,userList,30000, TimeUnit.MILLISECONDS);
+        } catch (Exception e) {
+            log.error("redis set key error",e);
+        }
 
         return ResultUtils.success(userList);
 

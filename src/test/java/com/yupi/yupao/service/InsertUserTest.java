@@ -63,7 +63,7 @@ public class InsertUserTest {
         List<CompletableFuture<Void>> futureList=new ArrayList<>();
 
         int j=0;
-        for (int i = 0; i < 20; i++) {
+        for (int i = 0; i < 10; i++) {
             List<Users> list=new ArrayList<>();
            while (true){
                 j++;
@@ -80,14 +80,14 @@ public class InsertUserTest {
                 users.setPlanetCode("111111");
                 users.setTags("[]");
                 list.add(users);
-                if(j%500==0){
+                if(j%1000==0){
                     break;
                 }
             }
 
             CompletableFuture<Void> future=CompletableFuture.runAsync(()->{
                 System.out.println("threadName:"+Thread.currentThread().getName());
-                usersService.saveBatch(list,500);
+                usersService.saveBatch(list,1000);
             },executorService);
             futureList.add(future);
         }
