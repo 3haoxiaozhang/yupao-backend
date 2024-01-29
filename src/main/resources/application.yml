@@ -2,6 +2,8 @@ server:
   port: 8080
   servlet:
     context-path: /api
+
+
 spring:
   application:
     name: yupao-backend
@@ -11,19 +13,46 @@ spring:
     url: jdbc:mysql://localhost:3306/yupi
     username: root
     password: 1234
-  #session失效时间
+  #session失效时间  86400 是两个月
   session:
     timeout: 86400
+    store-type: redis
+
+  #redis配置
+  redis:
+    port: 6379
+    host: localhost
+    database: 0
+    password: 123456
+
 
   #当为true时：mybatis-plus会将Java对象的驼峰式命名的常量转成下划线的方式，再与数据库表列字段进行匹配，这样会造成错误。 此时需要利用@TableField注解指定常量在表中的列名。
   #当为false时：此时就需要数据库里每列都是下划线的命名方式
 mybatis-plus:
   configuration:
     map-underscore-to-camel-case: false
+      #mybatis-plus配置控制台打印完整带参数SQL语句
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
   global-config:
     db-config:
       logic-delete-field: isDelete # 全局逻辑删除的实体字段名(since 3.3.0,配置后可以忽略不配置步骤2)
       logic-delete-value: 1 # 逻辑已删除值(默认为 1)
       logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
+
+knife4j:
+  enable: true
+  openapi:
+    title: 用户中心接口文档
+    description: "用户中心接口文档"
+    email: xiaoymin@foxmail.com
+    concat: 场
+    url: https://github.com
+    version: v4.0
+    group:
+      test1:
+        group-name: 分组名称
+        api-rule: package
+        api-rule-resources:
+          - com.yupi.yupao.controller
 
 
