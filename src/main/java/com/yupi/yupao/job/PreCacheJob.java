@@ -6,6 +6,8 @@ import com.yupi.yupao.mapper.UsersMapper;
 import com.yupi.yupao.model.domain.Users;
 import com.yupi.yupao.service.UsersService;
 import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -29,35 +31,51 @@ public class PreCacheJob {
 
     @Resource
     private RedisTemplate<String,Object> redisTemplate;
+
+    @Resource
+    private RedissonClient redissonClient;
+
     //重点用户
     private List<Long> mainUserList= Arrays.asList(1L);
 
-
     //每天执行，加载预热用户
-    @Scheduled(cron = "0 16 17 * * *")
+    @Scheduled(cron = "0 12 16 * * *")
     public void doCacheRecommenUser(){
-        for (Long userId : mainUserList) {
+        RLock lock = redissonClient.getLock("yupao:precachejob:docache:lock");
+        try {
+            //只有一个线程能获取到锁
+            if(lock.tryLock(0, -1, TimeUnit.MILLISECONDS)) {
+                System.out.println("getlock:"+Thread.currentThread().getId());
 
-            QueryWrapper<Users> queryWrapper=new QueryWrapper();
-            Page<Users> userList = usersService.page(new Page<>(1,20), queryWrapper);
+                for (Long userId : mainUserList) {
+                    QueryWrapper<Users> queryWrapper=new QueryWrapper();
+                    Page<Users> userList = usersService.page(new Page<>(1,20), queryWrapper);
 
-            String redisKey=String.format("yupao.user.recommend:%s",userId);
-            ValueOperations<String,Object> operations = redisTemplate.opsForValue();
+                    String redisKey=String.format("yupao.user.recommend:%s",userId);
+                    ValueOperations<String,Object> operations = redisTemplate.opsForValue();
 
 
-           //写缓存
-            try {
-                operations.set(redisKey,userList,30000, TimeUnit.MILLISECONDS);
-            } catch (Exception e) {
-                log.error("redis set key error",e);
+                    //写缓存
+                    try {
+                        operations.set(redisKey,userList,30000, TimeUnit.MILLISECONDS);
+                    } catch (Exception e) {
+                        log.error("redis set key error",e);
+                    }
+                }
+
+            }
+        } catch (InterruptedException e) {
+           log.error("doCacheRecommenUser Error",e);
+        }finally {
+            //只能释放自己的锁
+            if(lock.isHeldByCurrentThread()){
+                lock.unlock();
             }
 
         }
-
-
     }
 
 
 
-
 }
+
