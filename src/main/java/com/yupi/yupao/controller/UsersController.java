@@ -190,7 +190,6 @@ public class UsersController {
     @GetMapping("/recommend")
     public BaseResponse<Page<Users>>  recommendUsers(Long pageSize,Long pageNum,HttpServletRequest request){
 
-
         Users loginUser=usersService.getLoginUser(request);
         String redisKey=String.format("yupao.user.recommend:%s",loginUser.getId());
         ValueOperations operations = redisTemplate.opsForValue();
@@ -211,7 +210,6 @@ public class UsersController {
         }
 
         return ResultUtils.success(userList);
-
     }
 
 

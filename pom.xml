@@ -51,6 +51,8 @@
             <version>3.12.0</version>
         </dependency>
 
+
+
         <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson 序列化反序列化操作-->
         <dependency>
             <groupId>com.google.code.gson</groupId>

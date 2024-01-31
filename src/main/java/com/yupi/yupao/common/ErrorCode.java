@@ -8,8 +8,8 @@ public enum ErrorCode {
     NO_AUTH(40101,"无权限",""),
     SYSTEM_ERROR(50000,"系统内部异常",""),
     USER_EXIST(50000,"账户已存在",""),
-    USER_NOT_EXIST(50000,"账户不存在","");
-
+    USER_NOT_EXIST(50000,"账户不存在",""),
+    NULL_ERROR(40011,"查询结果为空","");
 
     private final int code;
     /**
