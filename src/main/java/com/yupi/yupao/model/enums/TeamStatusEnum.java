@@ -1,4 +1,4 @@
-package com.yupi.yupao.model.domain.enums;
+package com.yupi.yupao.model.enums;
 
 /**
  * 队伍状态枚举

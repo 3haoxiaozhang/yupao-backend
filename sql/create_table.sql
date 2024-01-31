@@ -49,3 +49,11 @@ create table user_team
     isDelete   tinyint  default 0                 not null comment '是否删除'
 )
     comment '用户队伍关系';
+
+# 1.自己写sql
+# 查询队伍和创建人的信息
+# select * form team t left join user u on where t.userId=u.id;
+# 查询队伍和加入队伍成员的信息
+# select * from team t
+# left join user_team ut on t.id=ut.teamId
+# left join user u on ut.userId=u.id

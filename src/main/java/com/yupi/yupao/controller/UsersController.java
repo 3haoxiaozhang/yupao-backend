@@ -2,20 +2,17 @@ package com.yupi.yupao.controller;
 
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.yupi.yupao.common.BaseResponse;
 import com.yupi.yupao.common.ErrorCode;
 import com.yupi.yupao.common.ResultUtils;
-import com.yupi.yupao.config.RedisTemplateConfig;
 import com.yupi.yupao.contant.UserConstant;
 import com.yupi.yupao.exception.BusinessException;
 import com.yupi.yupao.model.domain.Users;
-import com.yupi.yupao.model.domain.request.UserLoginRequest;
-import com.yupi.yupao.model.domain.request.UserRegisterRequest;
+import com.yupi.yupao.model.request.UserLoginRequest;
+import com.yupi.yupao.model.request.UserRegisterRequest;
 import com.yupi.yupao.service.UsersService;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ValueOperations;

@@ -8,8 +8,11 @@ import com.yupi.yupao.common.ResultUtils;
 import com.yupi.yupao.exception.BusinessException;
 import com.yupi.yupao.model.domain.Team;
 import com.yupi.yupao.model.domain.Users;
-import com.yupi.yupao.model.domain.dto.TeamQuery;
-import com.yupi.yupao.model.domain.request.TeamAddRequest;
+import com.yupi.yupao.model.dto.TeamQuery;
+import com.yupi.yupao.model.request.TeamAddRequest;
+import com.yupi.yupao.model.request.TeamJoinRequest;
+import com.yupi.yupao.model.request.TeamUpdateRequest;
+import com.yupi.yupao.model.vo.TeamUserVo;
 import com.yupi.yupao.service.TeamService;
 import com.yupi.yupao.service.UsersService;
 import lombok.extern.slf4j.Slf4j;
@@ -61,11 +64,12 @@ public class TeamController {
     }
 
     @PostMapping("/update")
-    public BaseResponse<Boolean> updateTeam(@RequestBody Team team){
-        if(team==null){
+    public BaseResponse<Boolean> updateTeam(@RequestBody TeamUpdateRequest teamUpdateRequest,HttpServletRequest request){
+        if(teamUpdateRequest==null){
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
-        boolean result = teamService.updateById(team);
+        Users loginUser = usersService.getLoginUser(request);
+        boolean result = teamService.updateTeam(teamUpdateRequest,loginUser);
         if(!result){
             throw  new BusinessException(ErrorCode.SYSTEM_ERROR,"删除失败");
         }
@@ -86,17 +90,34 @@ public class TeamController {
         return ResultUtils.success(team);
     }
 
+
+
     @GetMapping("/list")
-    public BaseResponse<List<Team>> listTeams(TeamQuery teamQuery){
-         if(teamQuery==null){
-             throw new BusinessException(ErrorCode.PARAMS_ERROR);
-         }
-         Team team=new Team();
-         BeanUtils.copyProperties(team,teamQuery);
-        QueryWrapper<Team> queryWrapper=new QueryWrapper<>(team);
-        List<Team> teamList = teamService.list(queryWrapper);
+    public BaseResponse<List<TeamUserVo>> listTeams(TeamQuery teamQuery,HttpServletRequest request){
+        if(teamQuery==null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Users loginUser = usersService.getLoginUser(request);
+        boolean admin = usersService.isAdmin(loginUser);
+        List<TeamUserVo> teamList = teamService.listTeams(teamQuery,admin);
         return ResultUtils.success(teamList);
     }
+
+
+
+
+
+    @PostMapping("/join")
+    public BaseResponse<Boolean> joinTeam(@RequestBody TeamJoinRequest teamJoinRequest,HttpServletRequest request){
+        if(teamJoinRequest==null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR,"请求参数错误");
+        }
+        Users loginUser = usersService.getLoginUser(request);
+        Boolean result= teamService.joinTeam(teamJoinRequest,loginUser);
+        return ResultUtils.success(result);
+    }
+
+
 
     @GetMapping("/list/page")
     public BaseResponse<Page<Team>> listTeamsByPage(TeamQuery teamQuery){
@@ -112,6 +133,9 @@ public class TeamController {
         Page<Team> pageResult = teamService.page(page,queryWrapper);
        return ResultUtils.success(pageResult);
     }
+
+
+
 
 
 

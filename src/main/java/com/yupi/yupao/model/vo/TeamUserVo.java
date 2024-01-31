@@ -1,18 +1,21 @@
-package com.yupi.yupao.model.domain.dto;
+package com.yupi.yupao.model.vo;
 
 import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
-import com.yupi.yupao.common.PageRequest;
+import com.yupi.yupao.model.domain.Users;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
+import org.apache.catalina.User;
 
+import java.io.Serializable;
 import java.util.Date;
+import java.util.List;
 
-@EqualsAndHashCode(callSuper = true)
+/**
+ * 队伍和用户信息封装类
+ */
 @Data
-public class TeamQuery extends PageRequest {
+public class TeamUserVo implements Serializable {
     /**
      * id
      */
@@ -34,6 +37,10 @@ public class TeamQuery extends PageRequest {
      */
     private Integer maxNum;
 
+    /**
+     * 过期时间
+     */
+    private Date expireTime;
 
     /**
      * 用户id
@@ -46,5 +53,13 @@ public class TeamQuery extends PageRequest {
     private Integer status;
 
 
+    /**
+     *  更新时间
+     */
+    private Date updateTime;
 
+    /**
+     * 创建队伍的用户
+     */
+    UserVo createUser;
 }
